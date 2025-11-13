@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>An Animation for Siri</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
   html,body{
     height:100%;
@@ -55,7 +56,6 @@
     font-size:13px;
     color:#ccc;
   }
-  /* Burada ufak bir typo vardı: #pwInput} → #pwInput */
   #pwInput{
     width:100%;
     padding:8px 10px;
@@ -489,17 +489,15 @@ function tick(t){
   requestAnimationFrame(tick);
 }
 
-/* === TIKLAMA === */
-canvas.addEventListener('click', e=>{
+/* === ORTAK TIKLAMA İŞLEMCİSİ (MOUSE + TOUCH) === */
+function handleCanvasTap(clientX, clientY){
   if(!assetsReady || !isUnlocked) return;
 
-  const r=canvas.getBoundingClientRect();
-
-  // 🔥 ÖLÇEK DÜZELTMELİ TIKLAMA KOORDİNATLARI
+  const r = canvas.getBoundingClientRect();
   const scaleX = canvas.width  / r.width;
   const scaleY = canvas.height / r.height;
-  const x = (e.clientX - r.left) * scaleX;
-  const y = (e.clientY - r.top)  * scaleY;
+  const x = (clientX - r.left) * scaleX;
+  const y = (clientY - r.top)  * scaleY;
 
   if(state==='intro'){
     if(pointInRect(x,y,INTRO_AREA)){
@@ -583,9 +581,18 @@ canvas.addEventListener('click', e=>{
     }
     return;
   }
+}
 
-  // final, finalScene, fall, move, click1/2/3, jiggle sırasında tıklama yok
+/* === CLICK + TOUCH EVENTLERİ === */
+canvas.addEventListener('click', e=>{
+  handleCanvasTap(e.clientX, e.clientY);
 });
+
+canvas.addEventListener('touchstart', e=>{
+  const t = e.touches[0];
+  handleCanvasTap(t.clientX, t.clientY);
+  e.preventDefault(); // scroll vs. engelle
+}, { passive:false });
 </script>
 </body>
 </html>
